@@ -1,0 +1,35 @@
+/* Fondo de color gris claro */
+body {
+    background-color: #f8f9fa;  /* Gris claro */
+}
+
+/* Estilos para los mensajes de error */
+.error {
+    color: red;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+/* Estilos para el contenedor del formulario */
+.container {
+    background-color: white;
+}
+
+/* Ancho de los botones */
+button {
+    width: 100px;
+}
+
+/* Estilo para la sección de resultados de búsqueda */
+#resultadoBusqueda {
+    font-size: 1.1em;
+}
+
+/* Estilo para el input del código de país */
+.codigo-pais {
+    width: 70px; /* Ancho adecuado para el código +56 */
+    text-align: center;
+    background-color: #e9ecef; /* Color de fondo para diferenciarlo */
+    border: 1px solid #ced4da; /* Borde similar al resto del formulario */
+}
+
