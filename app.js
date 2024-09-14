@@ -19,80 +19,93 @@ function mostrarError(campo, mensaje) {
 
 // Función para validar el RUT
 function validarRUT(rut) {
-    // Verificar que haya un guion en el RUT
     const guionIndex = rut.lastIndexOf('-');
     if (guionIndex === -1) {
         return false;  // No hay guion
     }
 
-    // Separar la parte numérica y la parte final (después del guion)
     const parteNumerica = rut.slice(0, guionIndex);
     const parteFinal = rut.slice(guionIndex + 1);
 
-    // Verificar que la parte numérica tenga entre 7 y 8 caracteres y que sean solo números
     if (parteNumerica.length < 7 || parteNumerica.length > 8) {
-        return false;  // La parte numérica no tiene la longitud adecuada
+        return false;
     }
 
     for (let i = 0; i < parteNumerica.length; i++) {
         if (isNaN(parteNumerica[i])) {
-            return false;  // Hay un carácter que no es número
+            return false;
         }
     }
 
-    // Verificar que la parte final sea un número del 0 al 9 o la letra "k"
-    if (parteFinal.length !== 1) {
-        return false;  // La parte final debe tener exactamente un carácter
-    }
-
-    const ultimoCaracter = parteFinal.toLowerCase();  // Convertir a minúscula para evitar problemas de mayúsculas
+    const ultimoCaracter = parteFinal.toLowerCase();
     if (!(ultimoCaracter >= '0' && ultimoCaracter <= '9') && ultimoCaracter !== 'k') {
-        return false;  // No es un número entre 0-9 ni la letra "k"
+        return false;
     }
 
-    // Si pasa todas las validaciones
     return true;
 }
 
 // Función para validar la dirección
 function validarDireccion(direccion) {
-    // Verificar que la dirección incluya al menos un número
+    if (!direccion.trim()) {
+        return "La dirección no puede estar vacía.";
+    }
     const contieneNumero = /\d/.test(direccion);
     if (!contieneNumero) {
         return "La dirección debe contener una numeración.";
     }
-
-    // Verificar que la dirección no esté vacía
-    if (direccion.trim() === "") {
-        return "La dirección no puede estar vacía.";
-    }
-
-    // Si todo está correcto
     return true;
 }
 
 // Función para validar el teléfono
 function validarTelefono(telefono) {
-    // Verificar que el teléfono tenga exactamente 9 caracteres y que sean solo números
     if (telefono.length !== 9) {
         return "El teléfono debe tener exactamente 9 números.";
     }
-     // Verificar que todos los caracteres sean dígitos
-     for (let i = 0; i < telefono.length; i++) {
+
+    for (let i = 0; i < telefono.length; i++) {
         if (telefono[i] < '0' || telefono[i] > '9') {
             return "El teléfono solo puede contener números.";
         }
     }
 
-    // Si todo está correcto
+    return true;
+}
+
+// Función para validar los comentarios (máximo 200 caracteres)
+function validarComentarios(comentarios) {
+    if (comentarios.length > 200) {
+        return "Los comentarios no pueden tener más de 200 caracteres.";
+    }
+    return true;
+}
+
+// Función para validar la fecha de nacimiento (no permitir fechas futuras)
+function validarFechaNacimiento(fechaNacimiento) {
+    const fechaIngresada = new Date(fechaNacimiento);
+    const fechaActual = new Date();
+    if (fechaIngresada > fechaActual) {
+        return "La fecha de nacimiento no puede ser una fecha futura.";
+    }
+    return true;
+}
+
+// Función para validar que solo haya letras y espacios en nombres, apellidos y ciudad
+function validarSoloLetras(texto) {
+    for (let i = 0; i < texto.length; i++) {
+        const char = texto[i];
+        if (!(char >= 'A' && char <= 'Z') && !(char >= 'a' && char <= 'z') && char !== ' ') {
+            return false;
+        }
+    }
     return true;
 }
 
 // Evento para el botón "Guardar"
-document.getElementById("guardarBtn").addEventListener("click", function () {
+document.getElementById("guardarBtn").addEventListener("click", function (event) {
+    event.preventDefault(); // Evita que el formulario se envíe si hay errores
     limpiarErrores();
 
-    // Capturar los valores de los campos
     const rut = document.getElementById("rut").value;
     const nombres = document.getElementById("nombres").value;
     const apellidos = document.getElementById("apellidos").value;
@@ -104,54 +117,93 @@ document.getElementById("guardarBtn").addEventListener("click", function () {
     const estadoCivil = document.getElementById("estadoCivil").value;
     const comentarios = document.getElementById("comentarios").value;
 
-    // Validación del RUT
+    let errores = false;
+
     if (!rut) {
         mostrarError("rut", "El RUT es requerido.");
-        return;
+        errores = true;
     } else if (!validarRUT(rut)) {
-        mostrarError("rut", "El RUT es inválido. Debe tener el formato XXXXXXXX-Y (números y guion, último carácter 0-9 o k).");
-        return;
+        mostrarError("rut", "El RUT es inválido. Debe tener el formato XXXXXXXX-Y.");
+        errores = true;
     }
 
-    // Validación de la dirección
     const resultadoDireccion = validarDireccion(direccion);
     if (resultadoDireccion !== true) {
         mostrarError("direccion", resultadoDireccion);
-        return;  // Detener la ejecución si la dirección no es válida
+        errores = true;
     }
 
-    // Validación del teléfono
     const resultadoTelefono = validarTelefono(telefono);
     if (resultadoTelefono !== true) {
         mostrarError("telefono", resultadoTelefono);
-        return;  // Detener la ejecución si el teléfono no es válido
+        errores = true;
     }
 
-    // Validación de otros campos
-    if (!nombres) { mostrarError("nombres", "Los nombres son requeridos."); return; }
-    if (!apellidos) { mostrarError("apellidos", "Los apellidos son requeridos."); return; }
-    if (!ciudad) { mostrarError("ciudad", "La ciudad es requerida."); return; }
-    if (!email || !email.includes("@")) { mostrarError("email", "El email es inválido."); return; }
-    if (!fechaNacimiento) { mostrarError("fechaNacimiento", "La fecha de nacimiento es requerida."); return; }
-    if (!estadoCivil) { mostrarError("estadoCivil", "El estado civil es requerido."); return; }
+    if (!nombres) {
+        mostrarError("nombres", "Los nombres son requeridos.");
+        errores = true;
+    } else if (!validarSoloLetras(nombres)) {
+        mostrarError("nombres", "Los nombres solo pueden contener letras y espacios.");
+        errores = true;
+    }
+
+    if (!apellidos) {
+        mostrarError("apellidos", "Los apellidos son requeridos.");
+        errores = true;
+    } else if (!validarSoloLetras(apellidos)) {
+        mostrarError("apellidos", "Los apellidos solo pueden contener letras y espacios.");
+        errores = true;
+    }
+
+    if (!ciudad) {
+        mostrarError("ciudad", "La ciudad es requerida.");
+        errores = true;
+    } else if (!validarSoloLetras(ciudad)) {
+        mostrarError("ciudad", "La ciudad solo puede contener letras y espacios.");
+        errores = true;
+    }
+
+    if (!email || !email.includes("@")) {
+        mostrarError("email", "El email es inválido.");
+        errores = true;
+    }
+
+    const resultadoFechaNacimiento = validarFechaNacimiento(fechaNacimiento);
+    if (resultadoFechaNacimiento !== true) {
+        mostrarError("fechaNacimiento", resultadoFechaNacimiento);
+        errores = true;
+    }
+
+    if (!estadoCivil) {
+        mostrarError("estadoCivil", "El estado civil es requerido.");
+        errores = true;
+    }
+
+    const resultadoComentarios = validarComentarios(comentarios);
+    if (resultadoComentarios !== true) {
+        mostrarError("comentarios", resultadoComentarios);
+        errores = true;
+    }
 
     // Verificar si el usuario ya existe
-    let usuarioExistente = usuarios.find(user => user.rut === rut);
-    if (usuarioExistente) {
-        if (confirm("El usuario ya existe. ¿Desea sobreescribirlo?")) {
-            usuarios = usuarios.filter(user => user.rut !== rut);  // Eliminar el anterior
-        } else {
-            return;
+    if (!errores) {
+        let usuarioExistente = usuarios.find(user => user.rut === rut);
+        if (usuarioExistente) {
+            if (confirm("El usuario ya existe. ¿Desea sobreescribirlo?")) {
+                usuarios = usuarios.filter(user => user.rut !== rut);
+            } else {
+                return;
+            }
         }
+
+        // Guardar el nuevo usuario
+        usuarios.push({
+            rut, nombres, apellidos, direccion, ciudad, telefono, email, fechaNacimiento, estadoCivil, comentarios
+        });
+
+        alert("Usuario guardado con éxito.");
+        limpiarFormulario();
     }
-
-    // Guardar el nuevo usuario
-    usuarios.push({
-        rut, nombres, apellidos, direccion, ciudad, telefono, email, fechaNacimiento, estadoCivil, comentarios
-    });
-
-    alert("Usuario guardado con éxito.");
-    limpiarFormulario();
 });
 
 // Evento para el botón "Buscar"
